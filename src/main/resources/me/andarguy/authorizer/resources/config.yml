@@ -1,0 +1,50 @@
+# Don't use \n, use {NL}.
+settings:
+  # Maximum time for player to authenticate in milliseconds. If the player stays on the auth limbo for longer than this time, then the player will be kicked.
+  auth-time: 60000
+  session-duration: 604800000
+  enable-bossbar: true
+  # Available colors: PINK, BLUE, RED, GREEN, YELLOW, PURPLE, WHITE
+  bossbar-color: "WHITE"
+  # Available overlays: PROGRESS, NOTCHED_6, NOTCHED_10, NOTCHED_12, NOTCHED_20
+  bossbar-overlay: "PROGRESS"
+  min-password-length: 4
+  # Max password length for the BCrypt hashing algorithm, which is used in this plugin, can't be higher than 71. You can set a lower value than 71.
+  max-password-length: 32
+  online-mode-need-auth: true
+  # Needs floodgate plugin.
+  floodgate-need-auth: true
+  # TOTALLY disables hybrid auth feature
+  force-offline-mode: true
+  # Forces all players to get offline uuid
+  force-offline-uuid: true
+  # Forcibly set player's UUID to the value from the database
+  # If the player had the cracked account, and switched to the premium account, the cracked UUID will be used.
+  save-uuid: true
+  register-need-repeat-password: true
+  change-password-need-old-password: true
+  login-attempts: 3
+  world:
+    load: false
+    ticks: 1000
+    dimension: "OVERWORLD"
+    # World file type: schematic (1.12.2 and lower), structure block .nbt (saved in the latest version)
+    world-file-type: "structure"
+    world-file-path: "house.nbt"
+  auth-coords:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    yaw: 0.0
+    pitch: 0.0
+
+# Database settings
+database:
+  # Database type: mysql, postgresql or h2.
+  storage-type: "mysql"
+  # Settings for Network-based database (like MySQL, PostgreSQL):
+  hostname: "localhost"
+  user: "user"
+  password: "password"
+  database: "database"
+  connection-parameters: "?autoReconnect=true&initialTimeout=1&useSSL=false"

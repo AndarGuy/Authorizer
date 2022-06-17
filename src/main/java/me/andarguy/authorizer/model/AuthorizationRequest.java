@@ -27,7 +27,7 @@ public class AuthorizationRequest {
     @DatabaseField(columnName = "ip", canBeNull = false)
     private String ip;
 
-    @DatabaseField(columnName = "status", canBeNull = false, dataType = DataType.ENUM_INTEGER)
+    @DatabaseField(columnName = "status", canBeNull = false, dataType = DataType.ENUM_NAME)
     private AuthorizationRequest.Status status;
 
     public AuthorizationRequest() {

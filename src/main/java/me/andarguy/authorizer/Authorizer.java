@@ -18,6 +18,8 @@ import me.andarguy.authorizer.listener.AuthListener;
 import me.andarguy.authorizer.settings.Messages;
 import me.andarguy.authorizer.settings.Settings;
 import me.andarguy.authorizer.utils.FileUtils;
+import me.andarguy.cc.common.CoreAPI;
+import me.andarguy.cc.velocity.CCVelocity;
 import net.elytrium.java.commons.mc.serialization.Serializer;
 import net.elytrium.java.commons.mc.serialization.Serializers;
 import net.elytrium.limboapi.api.Limbo;
@@ -46,6 +48,7 @@ import java.util.Objects;
         },
         dependencies = {
                 @Dependency(id = "limboapi"),
+                @Dependency(id = "cc")
         }
 )
 public class Authorizer {
@@ -57,6 +60,9 @@ public class Authorizer {
     private static Serializer serializer;
 
     @Getter
+    private CoreAPI coreAPI;
+
+    @Getter
     private final ProxyServer server;
     private final Path data;
     @Getter
@@ -66,7 +72,7 @@ public class Authorizer {
     @Getter
     private final ProcessHandler processHandler;
     @Getter
-    private final AccountHandler accountHandler;
+    private final SessionHandler accountHandler;
     @Getter
     private final PremiumHandler premiumHandler;
     @Getter
@@ -77,6 +83,7 @@ public class Authorizer {
         Authorizer.instance = this;
         Authorizer.logger = logger;
         Authorizer.serializer = new Serializer(Objects.requireNonNullElse(Serializers.MINIMESSAGE.getSerializer(), Serializers.PLAIN.getSerializer()));
+
         this.server = server;
         this.data = data;
 
@@ -85,7 +92,7 @@ public class Authorizer {
         this.databaseHandler = new DatabaseHandler(this);
         this.processHandler = new ProcessHandler(this);
         this.premiumHandler = new PremiumHandler(this);
-        this.accountHandler = new AccountHandler(this);
+        this.accountHandler = new SessionHandler(this);
     }
 
     @Subscribe
@@ -114,6 +121,8 @@ public class Authorizer {
             this.server.shutdown();
             return;
         }
+
+        this.coreAPI = CCVelocity.getApi();
 
         logger.info("Database module loaded...");
 

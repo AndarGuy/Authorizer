@@ -1,16 +1,14 @@
 package me.andarguy.authorizer.command;
 
-import com.j256.ormlite.stmt.UpdateBuilder;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.proxy.Player;
 import me.andarguy.authorizer.Authorizer;
-import me.andarguy.authorizer.model.Account;
 import me.andarguy.authorizer.settings.Messages;
 import me.andarguy.authorizer.utils.CryptoUtils;
-
-import java.sql.SQLException;
+import me.andarguy.cc.common.models.PlayerAccount;
+import me.andarguy.cc.common.models.UserAccount;
 
 public class ChangePasswordCommand implements SimpleCommand {
 
@@ -28,23 +26,26 @@ public class ChangePasswordCommand implements SimpleCommand {
         if (source instanceof Player) {
             if (args.length == 2) {
 
-                Account player = this.plugin.getAccountHandler().getAccount(((Player) source));
-                if (player == null) {
+                PlayerAccount playerAccount = this.plugin.getCoreAPI().getPlayerAccount(((Player) source).getUsername());
+
+                if (playerAccount == null) {
                     source.sendMessage(Messages.NOT_REGISTERED.asComponent());
                     return;
-                } else if (!player.getHashedPassword().isEmpty() && !CryptoUtils.checkPassword(args[0], player.getHashedPassword())) {
+                }
+
+                UserAccount userAccount = this.plugin.getCoreAPI().getUserAccount(playerAccount);
+
+                if (!userAccount.getHashedPassword().isEmpty() && !CryptoUtils.checkPassword(args[0], userAccount.getHashedPassword())) {
                     source.sendMessage(Messages.WRONG_PASSWORD.asComponent());
                     return;
                 }
 
                 try {
-                    UpdateBuilder<Account, String> updateBuilder = this.plugin.getDatabaseHandler().getPlayerDao().updateBuilder();
-                    updateBuilder.where().eq("id", ((Player) source).getUsername());
-                    updateBuilder.updateColumnValue("password", CryptoUtils.generateHash(args[1]));
-                    updateBuilder.update();
-                    this.plugin.getAccountHandler().cleanup(player.getName());
+                    userAccount.setHashedPassword(CryptoUtils.generateHash(args[1]));
+                    this.plugin.getCoreAPI().updateUserAccount(userAccount);
+                    this.plugin.getAccountHandler().cleanup(playerAccount.getName());
                     source.sendMessage(Messages.CHANGE_PASSWORD_SUCCESSFUL.asComponent());
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     source.sendMessage(Messages.ERROR_OCCURRED.asComponent());
                     e.printStackTrace();
                 }

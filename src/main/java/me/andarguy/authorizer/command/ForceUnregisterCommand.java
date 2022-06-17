@@ -35,7 +35,7 @@ public class ForceUnregisterCommand implements SimpleCommand {
 
       Serializer serializer = Authorizer.getSerializer();
       try {
-        this.plugin.getDatabaseHandler().getPlayerDao().deleteById(playerNick.toLowerCase(Locale.ROOT));
+        this.plugin.getCoreAPI().getPlayerAccountDao().deleteById(playerNick.toLowerCase(Locale.ROOT));
         this.plugin.getAccountHandler().cleanup(playerNick);
         this.plugin.getServer().getPlayer(playerNick).ifPresent(player -> player.disconnect(Messages.FORCE_UNREGISTER_KICK.asComponent()));
         source.sendMessage(serializer.deserialize(MessageFormat.format(Messages.FORCE_UNREGISTER_SUCCESSFUL.asString(), playerNick)));

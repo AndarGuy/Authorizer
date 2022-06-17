@@ -10,7 +10,6 @@ import com.j256.ormlite.table.TableInfo;
 import com.j256.ormlite.table.TableUtils;
 import lombok.Getter;
 import me.andarguy.authorizer.Authorizer;
-import me.andarguy.authorizer.model.Account;
 import me.andarguy.authorizer.model.AuthorizationRequest;
 import me.andarguy.authorizer.settings.Settings;
 
@@ -26,9 +25,6 @@ public class DatabaseHandler extends Handler implements Loadable {
 
         Objects.requireNonNull(org.postgresql.Driver.class);
     }
-
-    @Getter
-    private Dao<Account, String> playerDao;
 
     @Getter
     private Dao<AuthorizationRequest, String> requestDao;
@@ -65,14 +61,6 @@ public class DatabaseHandler extends Handler implements Loadable {
             return false;
         }
 
-        try {
-            TableUtils.createTableIfNotExists(this.connection, Account.class);
-            this.playerDao = DaoManager.createDao(this.connection, Account.class);
-            this.repairDatabase(this.playerDao);
-        } catch (SQLException e) {
-            Authorizer.getLogger().error("An exception occurred while trying to create 'users' database.");
-            return false;
-        }
         try {
             TableUtils.createTableIfNotExists(this.connection, AuthorizationRequest.class);
             this.requestDao = DaoManager.createDao(this.connection, AuthorizationRequest.class);

@@ -1,8 +1,8 @@
 package me.andarguy.authorizer;
 
 import me.andarguy.authorizer.handler.*;
-import me.andarguy.authorizer.model.Account;
 import me.andarguy.authorizer.settings.Messages;
+import me.andarguy.cc.common.models.PlayerAccount;
 import net.elytrium.java.commons.mc.serialization.Serializer;
 import org.slf4j.Logger;
 
@@ -16,18 +16,18 @@ public class AuthorizerAPI {
     private final static DatabaseHandler databaseHandler = INSTANCE.getDatabaseHandler();
     private final static ProcessHandler processHandler = INSTANCE.getProcessHandler();
     private final static PremiumHandler premiumHandler = INSTANCE.getPremiumHandler();
-    private final static AccountHandler accountHandler = INSTANCE.getAccountHandler();
+    private final static SessionHandler accountHandler = INSTANCE.getAccountHandler();
 
-    public static boolean isPremium(String name) {
-        return premiumHandler.isPremium(name);
+//    public static boolean isPremium(String name) {
+//        return premiumHandler.isPremium(name);
+//    }
+
+    public static PlayerAccount getAccount(String name) {
+        return INSTANCE.getCoreAPI().getPlayerAccount(name);
     }
 
-    public static Account getAccount(String name) {
-        return accountHandler.getAccount(name);
-    }
-
-    public static Account getAccount(UUID uuid) {
-        return accountHandler.getAccount(uuid);
+    public static PlayerAccount getAccount(UUID uuid) {
+        return INSTANCE.getCoreAPI().getPlayerAccount(uuid);
     }
 
     public static void forceLogin(String name) {

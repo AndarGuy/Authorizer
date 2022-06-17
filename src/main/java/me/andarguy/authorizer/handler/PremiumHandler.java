@@ -2,10 +2,11 @@ package me.andarguy.authorizer.handler;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.j256.ormlite.stmt.QueryBuilder;
 import me.andarguy.authorizer.Authorizer;
-import me.andarguy.authorizer.model.Account;
 import me.andarguy.authorizer.settings.Settings;
+import me.andarguy.cc.common.models.PlayerAccount;
+import me.andarguy.cc.common.models.UserAccount;
+import me.andarguy.cc.thirdparty.com.j256.ormlite.stmt.QueryBuilder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -57,34 +58,11 @@ public class PremiumHandler extends Handler implements Loadable {
     }
 
     public boolean isPremium(String name) {
-        DatabaseHandler handler = this.plugin.getDatabaseHandler();
         if (Settings.SETTINGS_FORCE_OFFLINE_MODE.asBoolean()) {
             return false;
         } else {
             try {
-                if (this.isPremiumExternal(name)) {
-                    QueryBuilder<Account, String> premiumRegisteredQuery = handler.getPlayerDao().queryBuilder();
-                    premiumRegisteredQuery.where()
-                            .eq("id", name.toLowerCase(Locale.ROOT))
-                            .and()
-                            .ne("password", "");
-                    premiumRegisteredQuery.setCountOf(true);
-
-                    QueryBuilder<Account, String> premiumUnregisteredQuery = handler.getPlayerDao().queryBuilder();
-                    premiumUnregisteredQuery.where()
-                            .eq("id", name.toLowerCase(Locale.ROOT))
-                            .and()
-                            .eq("password", "");
-                    premiumUnregisteredQuery.setCountOf(true);
-
-                    if (Settings.SETTINGS_ONLINE_MODE_NEED_AUTH.asBoolean()) {
-                        return handler.getPlayerDao().countOf(premiumRegisteredQuery.prepare()) == 0 && handler.getPlayerDao().countOf(premiumUnregisteredQuery.prepare()) != 0;
-                    } else {
-                        return handler.getPlayerDao().countOf(premiumRegisteredQuery.prepare()) == 0;
-                    }
-                } else {
-                    return false;
-                }
+                return this.isPremiumExternal(name);
             } catch (Exception e) {
                 Authorizer.getLogger().error("Unable to authenticate with Mojang.", e);
                 return false;

@@ -5,9 +5,10 @@ import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.proxy.Player;
 import me.andarguy.authorizer.Authorizer;
-import me.andarguy.authorizer.model.Account;
 import me.andarguy.authorizer.settings.Messages;
 import me.andarguy.authorizer.utils.CryptoUtils;
+import me.andarguy.cc.common.models.PlayerAccount;
+import me.andarguy.cc.common.models.UserAccount;
 
 import java.sql.SQLException;
 import java.util.Locale;
@@ -29,14 +30,18 @@ public class UnregisterCommand implements SimpleCommand {
       if (args.length == 2) {
         if ("confirm".equalsIgnoreCase(args[1])) {
           String username = ((Player) source).getUsername();
-          Account player = plugin.getAccountHandler().getAccount(username);
-          if (player == null) {
+          PlayerAccount playerAccount = plugin.getCoreAPI().getPlayerAccount(username);
+          if (playerAccount == null) {
             source.sendMessage(Messages.NOT_REGISTERED.asComponent());
-          } else if (player.getHashedPassword().isEmpty()) {
+            return;
+          }
+
+          UserAccount userAccount = plugin.getCoreAPI().getUserAccount(playerAccount);
+          if (userAccount.getHashedPassword().isEmpty()) {
             source.sendMessage(Messages.CRACKED_COMMAND.asComponent());
-          } else if (CryptoUtils.checkPassword(args[0], player.getHashedPassword())) {
+          } else if (CryptoUtils.checkPassword(args[0], userAccount.getHashedPassword())) {
             try {
-              this.plugin.getDatabaseHandler().getPlayerDao().deleteById(username.toLowerCase(Locale.ROOT));
+              this.plugin.getCoreAPI().getPlayerAccountDao().deleteById(username.toLowerCase(Locale.ROOT));
               this.plugin.getAccountHandler().cleanup(username);
               ((Player) source).disconnect(Messages.UNREGISTER_SUCCESSFUL.asComponent());
             } catch (SQLException e) {

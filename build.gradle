@@ -4,7 +4,7 @@ plugins {
 }
 
 setGroup("me.andarguy")
-setVersion("0.2")
+setVersion("0.3")
 
 jar {
     destinationDirectory.set(file("/Users/mikhail/Desktop/Minecraft Server/Proxy Server/plugins"))
@@ -43,6 +43,8 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok:1.18.24'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 
+    compileOnly files('../CCVelocity/build/libs/CCVelocity-0.1.jar')
+
     compileOnly("net.elytrium:limboapi-api:1.0.5")
 
     compileOnly("com.velocitypowered:velocity-api:3.1.2-SNAPSHOT")
@@ -53,7 +55,7 @@ dependencies {
     implementation("com.j256.ormlite:ormlite-jdbc:6.1")
     
     implementation("mysql:mysql-connector-java:8.0.29")
-    implementation("org.postgresql:postgresql:42.3.5")
+    implementation('org.postgresql:postgresql:42.3.6')
 }
 
 shadowJar {

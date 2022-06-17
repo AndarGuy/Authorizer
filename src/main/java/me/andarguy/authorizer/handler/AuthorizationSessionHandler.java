@@ -1,10 +1,3 @@
-/*
- * This file is part of a NickUC project
- *
- * Copyright (c) NickUC <nickuc.com>
- * https://github.com/nickuc
- */
-
 package me.andarguy.authorizer.handler;
 
 import com.velocitypowered.api.proxy.Player;
@@ -12,10 +5,11 @@ import com.velocitypowered.api.scheduler.ScheduledTask;
 import lombok.Getter;
 import me.andarguy.authorizer.Authorizer;
 import me.andarguy.authorizer.event.LoginEvent;
-import me.andarguy.authorizer.model.Account;
 import me.andarguy.authorizer.model.AuthorizationRequest;
 import me.andarguy.authorizer.settings.Messages;
 import me.andarguy.authorizer.settings.Settings;
+import me.andarguy.cc.common.models.PlayerAccount;
+import me.andarguy.cc.common.models.UserAccount;
 import net.elytrium.limboapi.api.Limbo;
 import net.elytrium.limboapi.api.LimboSessionHandler;
 import net.elytrium.limboapi.api.player.LimboPlayer;
@@ -33,13 +27,14 @@ public class AuthorizationSessionHandler extends Handler implements LimboSession
 
     @Getter
     private final Player proxyPlayer;
-    private final Account playerAccount;
+    private final PlayerAccount playerAccount;
+    private final UserAccount userAccount;
     private final List<ScheduledTask> tasks = new ArrayList<>();
     @Getter
     private LimboPlayer limboPlayer;
     private BossBar bossBar;
 
-    private Account.AuthorizationType authorizationType;
+    private UserAccount.AuthorizationType authorizationType;
 
     private int attempts;
     private AuthorizationRequest authorizationRequest;
@@ -47,9 +42,9 @@ public class AuthorizationSessionHandler extends Handler implements LimboSession
     public AuthorizationSessionHandler(Authorizer plugin, Player proxyPlayer) {
         super(plugin);
         this.proxyPlayer = proxyPlayer;
-        this.playerAccount = plugin.getAccountHandler().getAccount(proxyPlayer);
+        this.playerAccount = plugin.getCoreAPI().getPlayerAccount(proxyPlayer.getUsername());
+        this.userAccount = plugin.getCoreAPI().getUserAccount(this.playerAccount);
         this.attempts = Settings.SETTINGS_LOGIN_ATTEMPTS.asInt();
-        this.authorizationType = playerAccount.getAuthorizationType();
     }
 
     @Override
@@ -78,9 +73,11 @@ public class AuthorizationSessionHandler extends Handler implements LimboSession
             this.proxyPlayer.showBossBar(this.bossBar);
         }
 
-        this.authorizationType = this.playerAccount.getAuthorizationType();
+        this.authorizationType = this.userAccount.getAuthorizationType();
 
-        if (this.authorizationType == Account.AuthorizationType.INTERACTIVE) {
+        System.out.println(this.authorizationType);
+
+        if (this.authorizationType == UserAccount.AuthorizationType.INTERACTIVE) {
             try {
                 this.authorizationRequest = new AuthorizationRequest(
                         UUID.randomUUID().toString(),
@@ -107,11 +104,12 @@ public class AuthorizationSessionHandler extends Handler implements LimboSession
                         }).repeat(3, TimeUnit.SECONDS).schedule());
             } catch (SQLException e) {
                 this.proxyPlayer.sendMessage(Messages.ERROR_OCCURRED.asComponent());
-                this.authorizationType = Account.AuthorizationType.STANDARD;
+                this.authorizationType = UserAccount.AuthorizationType.STANDARD;
+                e.printStackTrace();
             }
         }
 
-        if (this.authorizationType == Account.AuthorizationType.STANDARD) {
+        if (this.authorizationType == UserAccount.AuthorizationType.STANDARD) {
             this.proxyPlayer.sendMessage(Messages.LOGIN.asComponent());
         }
 
@@ -130,13 +128,13 @@ public class AuthorizationSessionHandler extends Handler implements LimboSession
         Command command = Command.parse(args[0]);
         switch (command) {
             case LOGIN:
-                if (this.authorizationType != Account.AuthorizationType.STANDARD) {
+                if (this.authorizationType != UserAccount.AuthorizationType.STANDARD) {
                     this.proxyPlayer.sendMessage(Messages.DIFFERENT_AUTHORIZATION_TYPE.asComponent());
                     break;
                 }
                 if (args.length != 2) break;
                 String password = args[1];
-                if (!this.playerAccount.checkPassword(password)) {
+                if (!this.userAccount.checkPassword(password)) {
                     this.attempts--;
                     if (this.attempts <= 0)
                         this.proxyPlayer.disconnect(Messages.LOGIN_WRONG_PASSWORD_KICK.asComponent());

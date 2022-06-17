@@ -7,9 +7,9 @@ import lombok.Getter;
 import me.andarguy.authorizer.Authorizer;
 import me.andarguy.authorizer.event.AuthenticateEvent;
 import me.andarguy.authorizer.event.AwaitingAuthorizationEvent;
-import me.andarguy.authorizer.model.Account;
 import me.andarguy.authorizer.settings.Messages;
 import me.andarguy.authorizer.utils.StringUtils;
+import me.andarguy.cc.common.models.PlayerAccount;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +33,7 @@ public class ProcessHandler extends Handler {
             return;
         }
 
-        Account account = this.plugin.getAccountHandler().getAccount(nickname);
+        PlayerAccount account = this.plugin.getCoreAPI().getPlayerAccount(nickname);
 
         // check for registration to access
 
@@ -64,14 +64,14 @@ public class ProcessHandler extends Handler {
     }
 
     public void forceLogin(Player player) {
-        Account account = this.plugin.getAccountHandler().getAccount(player.getUsername());
+        PlayerAccount account = this.plugin.getCoreAPI().getPlayerAccount(player.getUsername());
         if (account == null) return;
             performLogin(player);
     }
 
     public void performLogin(Player player) {
         String toLower = player.getUsername().toLowerCase(Locale.ROOT);
-        Account account = this.plugin.getAccountHandler().getAccount(toLower);
+        PlayerAccount account = this.plugin.getCoreAPI().getPlayerAccount(toLower);
         if (!this.plugin.getAccountHandler().isAuthenticated(toLower)) {
             AuthorizationSessionHandler sessionHandler = sessions.getIfPresent(toLower);
             if (sessionHandler != null) {
